@@ -1,6 +1,5 @@
 import heapq
 
-
 def primMST(vertices, adj_list, start_v=None):
     if not vertices:
         return [], 0
