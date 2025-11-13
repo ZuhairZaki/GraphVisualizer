@@ -1,33 +1,36 @@
 import heapq
 
 
-def prim(vertices, adjacency_list, start=None):
+def primMST(vertices, adj_list, start_v=None):
     if not vertices:
         return [], 0
 
-    if start is None:
-        start = vertices[0]
+    if start_v is None:
+        start_v  = vertices[0]
 
-    visited = set()
+    mst_vertices = set()
     mst_edges = []
-    total_weight = 0
+    mst_weight = 0
+    pq = []
 
-    min_heap = []
+    mst_vertices.add(start_v)
+    for next, weight in adj_list.get(start_v, []):
+        heapq.heappush(pq, (weight, start_v, next))
 
-    def add_edges(vertex):
-        visited.add(vertex)
-        for neighbor, weight in adjacency_list.get(vertex, []):
-            if neighbor not in visited:
-                heapq.heappush(min_heap, (weight, vertex, neighbor))
-                
-    add_edges(start)
-
-    while min_heap and len(visited) < len(vertices):
-        weight, u, v = heapq.heappop(min_heap)
-        if v in visited:
+    while pq:
+        weight, u, v = heapq.heappop(pq)
+        if v in mst_vertices:
             continue
+        
+        mst_vertices.add(v)
         mst_edges.append((u, v, weight))
-        total_weight += weight
-        add_edges(v)
+        mst_weight += weight
+        
+        for next, weight in adj_list.get(v, []):
+            if next not in mst_vertices:
+                heapq.heappush(pq, (weight, v, next))
+                
+        if len(mst_vertices)==len(vertices):
+            break
 
-    return mst_edges, total_weight
+    return mst_edges, mst_weight
