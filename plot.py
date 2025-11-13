@@ -19,7 +19,6 @@ def compare_mst_times(sparse=True):
     prim_times = []
 
     for num_vertices in vertex_counts:
-        print(num_vertices)
         vertices, edges, adj_list = generate_connected_graph(num_vertices=num_vertices, edge_density=edge_density)
 
         start = time.perf_counter()
@@ -42,5 +41,5 @@ def compare_mst_times(sparse=True):
 
 
 if __name__=="__main__":
-    # compare_mst_times()
+    compare_mst_times()
     compare_mst_times(sparse=False)
