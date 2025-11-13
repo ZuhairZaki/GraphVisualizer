@@ -3,14 +3,15 @@ from tkinter import messagebox, ttk
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from kruskal import kruskal
-from prim import prim
+from kruskal import kruskalMST
+from prim import primMST
+import time
 
 
 class GraphGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Graph Builder")
+        self.root.title("Graph Input")
         self.root.geometry("900x600")
 
         self.G = nx.Graph()
@@ -71,7 +72,7 @@ class GraphGUI:
             ax=self.ax
         )
         
-        self.ax.set_title("Graph Visualization", fontsize=12)
+        self.ax.set_title("Graph Visualization", fontsize=8)
         self.ax.axis("off")
         self.canvas.draw()
 
@@ -126,20 +127,30 @@ class GraphGUI:
         if not self.edges:
             messagebox.showinfo("Empty Graph", "No edges in graph.")
             return
+        
+        if not nx.is_connected(self.G):
+            messagebox.showerror(
+                "Disconnected Graph",
+                "A Minimum Spanning Tree can only be formed from a connected graph."
+            )
+            return
 
         algo = self.alg_choice.get()
         try:
+            start = time.time()
             if algo == "Kruskal":
-                mst_edges, total = kruskal(list(self.adj_list.keys()), self.edges)
+                mst_edges, total = kruskalMST(list(self.adj_list.keys()), self.edges)
             else: 
-                mst_edges, total = prim(list(self.adj_list.keys()), self.adj_list)
+                mst_edges, total = primMST(list(self.adj_list.keys()), self.adj_list)
+            end = time.time()
+            elapsed = (end - start) * 1000
         except Exception as e:
             messagebox.showerror("Error", str(e))
             return
 
-        self.show_mst_window(mst_edges, total, algo)
+        self.show_mst_window(mst_edges, total, algo, elapsed)
         
-    def show_mst_window(self, mst_edges, total_weight, algorithm):
+    def show_mst_window(self, mst_edges, total_weight, algorithm, elapsed_time):
         win = tk.Toplevel(self.root)
         win.title(f"{algorithm} MST Result")
         win.geometry("600x400")
@@ -167,6 +178,11 @@ class GraphGUI:
         canvas = FigureCanvasTkAgg(fig, master=win)
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         canvas.draw()
+        
+        time_frame = tk.Frame(win)
+        time_frame.pack(pady=10)
+
+        tk.Label(time_frame, text=f"Execution Time: {elapsed_time:.4f} ms", font=("Arial", 10), fg="darkblue").pack()
 
     def clear_graph(self):
         self.G.clear()
